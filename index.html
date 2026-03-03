@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Warp â Instant LTL Freight Quotes</title>
-  <meta name="description" content="Get instant freight quotes from 15+ carriers. Enter your route, see prices in seconds. Use code 50OFFWARP for $50 off your first shipment.">
+  <title>Warp Freight Quote + Customer Dashboard</title>
+  <meta name="description" content="Public freight quote and customer dashboard rebuild with FTL vehicle API modes.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -846,7 +846,7 @@
           <button class="mode-btn" id="dashboardModeBtn" role="tab" aria-selected="false">Customer Dashboard</button>
         </div>
         <a class="topbar-link" href="https://customer.wearewarp.com" target="_blank" rel="noopener noreferrer">Log in</a>
-        <a class="topbar-cta" href="https://www.wearewarp.com" target="_blank" rel="noopener noreferrer">Learn more <span aria-hidden="true">â</span></a>
+        <a class="topbar-cta" href="https://www.wearewarp.com" target="_blank" rel="noopener noreferrer">Learn more <span aria-hidden="true">→</span></a>
       </div>
     </header>
 
@@ -873,7 +873,7 @@
                   <input class="date-input" id="pickupDate" name="pickupDate" type="date" required>
                 </div>
 
-                <button class="quote-btn" type="submit" id="quoteBtn">ð Quote</button>
+                <button class="quote-btn" type="submit" id="quoteBtn">🔍 Quote</button>
               </div>
 
               <div class="items-header">
@@ -904,9 +904,9 @@
           <aside class="dash-sidebar">
             <a class="warp-mark dash-logo" href="#">WARP</a>
             <nav class="dash-nav" aria-label="Customer navigation">
-              <a href="#"><span aria-hidden="true">â</span> Dashboard</a>
-              <a href="#" class="active"><span aria-hidden="true">ð</span> Shipments</a>
-              <a href="#"><span aria-hidden="true">ð</span> Carriers & Drivers</a>
+              <a href="#"><span aria-hidden="true">⌗</span> Dashboard</a>
+              <a href="#" class="active"><span aria-hidden="true">🗂</span> Shipments</a>
+              <a href="#"><span aria-hidden="true">🚚</span> Carriers & Drivers</a>
             </nav>
           </aside>
 
@@ -961,7 +961,7 @@
       <input class="input-slim" data-field="length" type="number" min="1" max="999" value="48" placeholder="L" required>
       <input class="input-slim" data-field="width" type="number" min="1" max="999" value="48" placeholder="W" required>
       <input class="input-slim" data-field="height" type="number" min="1" max="999" value="56" placeholder="H" required>
-      <button class="remove-item" type="button" title="Remove item" aria-label="Remove item">Ã</button>
+      <button class="remove-item" type="button" title="Remove item" aria-label="Remove item">×</button>
     </div>
   </template>
 
@@ -969,7 +969,7 @@
     // =========================================================================
     // CONFIG
     // =========================================================================
-    const API_URL = "/api/quote"; // Proxied through Vercel serverless function to bypass CORS
+    const API_URL = "/api/quote";
     const API_KEY = "warp-public-freight-quote@wearewarp.com";
     const BOOKING_BASE = "https://customer.wearewarp.com/public/freight-quote/create-shipment-freight-quote";
 
@@ -979,25 +979,25 @@
         id: "cargo_van",
         name: "Cargo Van",
         description: "Small dedicated deliveries",
-        icon: "ð",
+        icon: "🚐",
         code: "CARGO_VAN",
         maxPallets: 1,
         maxWeight: 2500
       },
       {
         id: "straight_truck_26",
-        name: "26â Box Truck",
+        name: "26’ Box Truck",
         description: "Mid-size dedicated freight",
-        icon: "ð",
+        icon: "🚚",
         code: "STRAIGHT_TRUCK_26",
         maxPallets: 12,
         maxWeight: 10000
       },
       {
         id: "dry_van_53",
-        name: "53â Truck",
+        name: "53’ Truck",
         description: "Full truckload capacity",
-        icon: "ð",
+        icon: "🚛",
         code: "DRY_VAN_53",
         maxPallets: 26,
         maxWeight: 44000
@@ -1005,16 +1005,16 @@
     ];
 
     const DASHBOARD_ROWS = [
-      { id: "P-00271-2428", route: "Los Angeles, CA â Brandon, FL", shipType: "FTL", dispatch: "1234-5678", carrier: "FedEx Freight", driver: "Robert Davis", cost: 2450, status: "in_progress", action: "Reassign" },
-      { id: "P-00271-2428", route: "Chicago, IL â Miami, FL", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 2000, status: "completed", action: "View" },
-      { id: "P-00271-2428", route: "Los Angeles, CA â Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "Unassigned", driver: "Unassigned", cost: 3200, status: "created", action: "Assign" },
-      { id: "P-00271-2428", route: "East Norwich, NY â Bound Brook, NJ", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "in_progress", action: "Assign" },
-      { id: "P-00271-2428", route: "Los Angeles, CA â Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "Unassigned", driver: "Unassigned", cost: 1750, status: "created", action: "Assign" },
-      { id: "P-00271-2428", route: "Los Angeles, CA â Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "cancelled", action: "Rebook" },
-      { id: "P-00271-2428", route: "Chicago, IL â Miami, FL", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "pending", action: "Assign" },
-      { id: "P-00271-2428", route: "Los Angeles, CA â Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "completed", action: "View" },
-      { id: "P-00271-2428", route: "Los Angeles, CA â Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "completed", action: "View" },
-      { id: "P-00271-2428", route: "Los Angeles, CA â Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "completed", action: "View" }
+      { id: "P-00271-2428", route: "Los Angeles, CA → Brandon, FL", shipType: "FTL", dispatch: "1234-5678", carrier: "FedEx Freight", driver: "Robert Davis", cost: 2450, status: "in_progress", action: "Reassign" },
+      { id: "P-00271-2428", route: "Chicago, IL → Miami, FL", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 2000, status: "completed", action: "View" },
+      { id: "P-00271-2428", route: "Los Angeles, CA → Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "Unassigned", driver: "Unassigned", cost: 3200, status: "created", action: "Assign" },
+      { id: "P-00271-2428", route: "East Norwich, NY → Bound Brook, NJ", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "in_progress", action: "Assign" },
+      { id: "P-00271-2428", route: "Los Angeles, CA → Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "Unassigned", driver: "Unassigned", cost: 1750, status: "created", action: "Assign" },
+      { id: "P-00271-2428", route: "Los Angeles, CA → Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "cancelled", action: "Rebook" },
+      { id: "P-00271-2428", route: "Chicago, IL → Miami, FL", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "pending", action: "Assign" },
+      { id: "P-00271-2428", route: "Los Angeles, CA → Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "completed", action: "View" },
+      { id: "P-00271-2428", route: "Los Angeles, CA → Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "completed", action: "View" },
+      { id: "P-00271-2428", route: "Los Angeles, CA → Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "completed", action: "View" }
     ];
 
     const ZIP_CITIES = {};
@@ -1142,7 +1142,7 @@
       const totalWeight = items.reduce((sum, item) => sum + item.weightTotal, 0);
 
       if (/^\d{5}$/.test(pickup) && /^\d{5}$/.test(delivery)) {
-        chips.push(`${pickup} â ${delivery}`);
+        chips.push(`${pickup} → ${delivery}`);
       }
       if (date) chips.push(new Date(date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }));
       if (totalPallets > 0) chips.push(`${totalPallets} pallet${totalPallets === 1 ? "" : "s"}`);
@@ -1177,9 +1177,9 @@
                 <h3 class="vehicle-name">${vehicle.name}</h3>
                 <p class="vehicle-desc">${vehicle.description}</p>
                 <div class="vehicle-meta">
-                  <span>ð¦ Max ${vehicle.maxPallets} pallet${vehicle.maxPallets > 1 ? "s" : ""}</span>
-                  <span>âï¸ Max ${vehicle.maxWeight.toLocaleString()} lbs</span>
-                  <span>ð§  ${vehicle.code}</span>
+                  <span>📦 Max ${vehicle.maxPallets} pallet${vehicle.maxPallets > 1 ? "s" : ""}</span>
+                  <span>⚖️ Max ${vehicle.maxWeight.toLocaleString()} lbs</span>
+                  <span>🧠 ${vehicle.code}</span>
                 </div>
               </div>
             </div>
@@ -1214,8 +1214,8 @@
         const transitText = estimateTransitText(quote);
 
         const action = quoteId
-          ? `<a class="select-btn" href="${BOOKING_BASE}?quoteId=${encodeURIComponent(quoteId)}" target="_blank" rel="noopener noreferrer">Select <span aria-hidden="true">âº</span></a>`
-          : `<span class="select-btn" style="opacity:0.6;pointer-events:none">Select <span aria-hidden="true">âº</span></span>`;
+          ? `<a class="select-btn" href="${BOOKING_BASE}?quoteId=${encodeURIComponent(quoteId)}" target="_blank" rel="noopener noreferrer">Select <span aria-hidden="true">›</span></a>`
+          : `<span class="select-btn" style="opacity:0.6;pointer-events:none">Select <span aria-hidden="true">›</span></span>`;
 
         return `
           <div class="option-row">
@@ -1225,8 +1225,8 @@
                 <span class="option-carrier">${escapeHtml(carrierName)}</span>
               </div>
               <div class="option-meta">
-                <span>ð Pickup: ${pickupDate}</span>
-                <span>â± Est transit: ${transitText}</span>
+                <span>📅 Pickup: ${pickupDate}</span>
+                <span>⏱ Est transit: ${transitText}</span>
               </div>
             </div>
             ${action}
@@ -1446,7 +1446,7 @@
       } finally {
         state.isLoading = false;
         quoteBtn.disabled = false;
-        quoteBtn.textContent = "ð Quote";
+        quoteBtn.textContent = "🔍 Quote";
       }
     }
 
@@ -1499,7 +1499,7 @@
 
         return `
           <tr>
-            <td>${row.id} <span class="muted">ð ð</span></td>
+            <td>${row.id} <span class="muted">🔗 📋</span></td>
             <td>${row.route}</td>
             <td>${row.shipType}</td>
             <td>${row.dispatch}</td>
