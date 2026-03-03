@@ -1,0 +1,1550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Warp â Instant LTL Freight Quotes</title>
+  <meta name="description" content="Get instant freight quotes from 15+ carriers. Enter your route, see prices in seconds. Use code 50OFFWARP for $50 off your first shipment.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-dark: #080b10;
+      --bg-card: rgba(26, 30, 38, 0.84);
+      --bg-card-2: rgba(32, 36, 45, 0.78);
+      --bg-input: rgba(255, 255, 255, 0.08);
+      --bg-input-focus: rgba(255, 255, 255, 0.13);
+      --line: rgba(255, 255, 255, 0.11);
+      --line-soft: rgba(255, 255, 255, 0.06);
+      --text: #eef2f8;
+      --text-dim: #a7b2c4;
+      --text-soft: #8390a4;
+      --green: #00ff2a;
+      --green-deep: #00d524;
+      --chip: rgba(0, 255, 42, 0.16);
+      --danger: #ff4b56;
+      --radius: 18px;
+      --radius-sm: 10px;
+      --shadow: 0 18px 48px rgba(0, 0, 0, 0.35);
+
+      --db-bg: #efeff4;
+      --db-sidebar: #dedfe8;
+      --db-card: #f7f8fb;
+      --db-line: #dcdeeb;
+      --db-text: #2a2c32;
+      --db-soft: #6f7381;
+      --db-indigo: #2f2eff;
+      --db-btn: #1f2025;
+    }
+
+    body {
+      font-family: "Manrope", "Helvetica Neue", sans-serif;
+      background: var(--bg-dark);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 34px;
+      border-bottom: 1px solid var(--line-soft);
+      backdrop-filter: blur(12px);
+      background: rgba(8, 11, 16, 0.86);
+    }
+
+    .warp-mark {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--green);
+      border-radius: 3px;
+      padding: 4px 10px;
+      letter-spacing: 0.28em;
+      color: var(--green);
+      font-family: "Sora", sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1;
+      text-decoration: none;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .mode-toggle {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .mode-btn {
+      border: none;
+      background: transparent;
+      color: var(--text-dim);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .mode-btn.is-active {
+      background: rgba(0, 255, 42, 0.16);
+      color: #eafff0;
+    }
+
+    .topbar-link {
+      color: var(--green);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .topbar-cta {
+      color: var(--green);
+      text-decoration: none;
+      border: 1px solid var(--green);
+      border-radius: 8px;
+      padding: 9px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: 0.16s ease;
+    }
+
+    .topbar-cta:hover {
+      background: rgba(0, 255, 42, 0.12);
+    }
+
+    main {
+      flex: 1;
+      position: relative;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.is-active {
+      display: block;
+    }
+
+    .quote-view {
+      min-height: calc(100vh - 74px);
+      position: relative;
+      padding: 22px 34px 40px;
+      background:
+        linear-gradient(180deg, rgba(8, 11, 16, 0.42) 0%, rgba(8, 11, 16, 0.82) 65%, rgba(8, 11, 16, 0.96) 100%),
+        url("../figma-exports/Thumbnail.png") center center / cover no-repeat,
+        #0a1018;
+    }
+
+    .quote-wrap {
+      max-width: 1260px;
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .quote-form-card {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px 20px;
+      backdrop-filter: blur(16px);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: 1.08fr 1.08fr 1fr auto;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #d4dbe7;
+    }
+
+    .field label .required {
+      color: #ff525a;
+    }
+
+    .input,
+    .input-slim,
+    .date-input,
+    .select {
+      width: 100%;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: var(--bg-input);
+      color: var(--text);
+      font-size: 17px;
+      font-weight: 600;
+      height: 42px;
+      padding: 0 12px;
+      outline: none;
+      transition: border-color 0.16s ease, background-color 0.16s ease;
+    }
+
+    .input::placeholder,
+    .input-slim::placeholder {
+      color: rgba(230, 236, 246, 0.38);
+    }
+
+    .input:focus,
+    .input-slim:focus,
+    .date-input:focus,
+    .select:focus {
+      background: var(--bg-input-focus);
+      border-color: rgba(0, 255, 42, 0.48);
+    }
+
+    .city-hint {
+      font-size: 13px;
+      color: var(--text-soft);
+      min-height: 18px;
+    }
+
+    .quote-btn {
+      border: none;
+      border-radius: 8px;
+      height: 42px;
+      min-width: 156px;
+      background: var(--green);
+      color: #07180a;
+      font-family: "Sora", sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.16s ease;
+    }
+
+    .quote-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(0, 255, 42, 0.3);
+      background: #23ff45;
+    }
+
+    .quote-btn:disabled {
+      opacity: 0.6;
+      transform: none;
+      box-shadow: none;
+      cursor: default;
+    }
+
+    .items-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 9px;
+    }
+
+    .items-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .add-item-btn {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.03);
+      color: #dbe4f6;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 10px;
+      cursor: pointer;
+    }
+
+    .item-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .item-row {
+      display: grid;
+      grid-template-columns: 0.9fr 1fr 0.92fr 0.92fr 0.92fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .remove-item {
+      border: none;
+      background: rgba(255, 82, 90, 0.14);
+      color: #ff8e94;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      font-size: 17px;
+      cursor: pointer;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .helper-text {
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+
+    .route-chip-wrap {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .route-chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #d5dced;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .error-banner {
+      display: none;
+      margin-top: 12px;
+      border: 1px solid rgba(255, 82, 90, 0.42);
+      background: rgba(255, 82, 90, 0.14);
+      color: #ffb4ba;
+      border-radius: 9px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .error-banner.is-visible {
+      display: block;
+    }
+
+    .vehicle-board {
+      background: rgba(10, 13, 19, 0.72);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow);
+    }
+
+    .vehicle-row {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.95fr) minmax(430px, 1.65fr);
+      border-top: 1px solid var(--line-soft);
+      min-height: 110px;
+    }
+
+    .vehicle-row:first-child {
+      border-top: none;
+    }
+
+    .vehicle-left {
+      padding: 16px 18px;
+      display: grid;
+      grid-template-columns: 72px 1fr;
+      gap: 12px;
+      border-right: 1px solid var(--line-soft);
+      align-items: center;
+      background: rgba(5, 7, 11, 0.42);
+    }
+
+    .vehicle-icon {
+      width: 72px;
+      height: 56px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 34px;
+      background: linear-gradient(160deg, rgba(0, 255, 42, 0.14), rgba(255, 255, 255, 0.02));
+    }
+
+    .vehicle-name {
+      font-family: "Sora", sans-serif;
+      font-size: 30px;
+      font-weight: 700;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      margin-bottom: 3px;
+    }
+
+    .vehicle-desc {
+      color: var(--text-soft);
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .vehicle-meta {
+      color: var(--text-dim);
+      font-size: 13px;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .vehicle-meta span {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .vehicle-right {
+      padding: 12px;
+      display: grid;
+      gap: 10px;
+      align-content: center;
+    }
+
+    .vehicle-state {
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      min-height: 82px;
+      display: grid;
+      place-items: center;
+      color: rgba(214, 222, 237, 0.5);
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      text-align: center;
+      padding: 8px;
+    }
+
+    .vehicle-state.loading {
+      color: #e6edff;
+      border-style: solid;
+      border-color: rgba(0, 255, 42, 0.36);
+      background: rgba(0, 255, 42, 0.08);
+    }
+
+    .vehicle-state.error {
+      color: #ffb4ba;
+      border-style: solid;
+      border-color: rgba(255, 82, 90, 0.52);
+      background: rgba(255, 82, 90, 0.12);
+    }
+
+    .option-row {
+      border: 1px solid var(--line);
+      background: var(--bg-card-2);
+      border-radius: 12px;
+      padding: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .option-main {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .option-price {
+      font-family: "Sora", sans-serif;
+      font-size: 33px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      color: #f7fbff;
+    }
+
+    .option-carrier {
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 8px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .option-meta {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      color: var(--text-dim);
+      font-size: 13px;
+      flex-wrap: wrap;
+    }
+
+    .select-btn {
+      border: none;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.12);
+      color: #f2f6ff;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 12px 22px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-width: 108px;
+    }
+
+    .select-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .subtle-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: rgba(214, 222, 237, 0.66);
+      text-align: right;
+    }
+
+    .dashboard-view {
+      min-height: calc(100vh - 74px);
+      background: var(--db-bg);
+      color: var(--db-text);
+      padding: 22px;
+    }
+
+    .dashboard-shell {
+      max-width: 1400px;
+      margin: 0 auto;
+      min-height: calc(100vh - 118px);
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--db-line);
+      background: var(--db-card);
+    }
+
+    .dash-sidebar {
+      background: var(--db-sidebar);
+      padding: 18px 12px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 20px;
+    }
+
+    .dash-logo {
+      color: var(--db-indigo);
+      border-color: var(--db-indigo);
+      font-size: 15px;
+      margin: 2px 8px;
+    }
+
+    .dash-nav {
+      display: grid;
+      gap: 5px;
+      align-content: start;
+    }
+
+    .dash-nav a {
+      text-decoration: none;
+      color: #545867;
+      border-radius: 8px;
+      padding: 10px 10px;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .dash-nav a.active {
+      color: #1e212b;
+      background: #f7f8fd;
+      box-shadow: inset 0 0 0 1px #e9eaf3;
+    }
+
+    .dash-main {
+      padding: 18px 20px 22px;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      gap: 14px;
+    }
+
+    .dash-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .dash-title {
+      font-family: "Sora", sans-serif;
+      font-size: 35px;
+      letter-spacing: -0.02em;
+    }
+
+    .dash-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .dash-actions button,
+    .dash-actions select,
+    .dash-actions input {
+      border: 1px solid #d8daea;
+      border-radius: 8px;
+      height: 35px;
+      padding: 0 10px;
+      background: #f6f7fc;
+      color: #4a4e5e;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .dash-actions .new {
+      background: var(--db-btn);
+      color: #fff;
+      border-color: transparent;
+      padding: 0 14px;
+      cursor: pointer;
+    }
+
+    .dash-table-wrap {
+      border: 1px solid #dde0ef;
+      border-radius: 12px;
+      background: #fafbff;
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1020px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #eceef6;
+      text-align: left;
+      padding: 12px 14px;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    th {
+      color: #8e93a3;
+      font-weight: 700;
+      background: #f4f5fa;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    td {
+      color: #454a58;
+      font-weight: 600;
+      background: #fafbff;
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: capitalize;
+    }
+
+    .status.in_progress { background: #dfe7ff; color: #4065f5; }
+    .status.completed { background: #dff7e8; color: #32a965; }
+    .status.created { background: #ececf2; color: #6e7382; }
+    .status.pending { background: #fce8d6; color: #d78129; }
+    .status.cancelled { background: #fee2e5; color: #d55766; }
+
+    .row-action {
+      color: #4f4bff;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .row-action:hover {
+      text-decoration: underline;
+    }
+
+    .muted {
+      color: #a2a7b5;
+      font-weight: 600;
+    }
+
+    @media (max-width: 1120px) {
+      .form-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .quote-btn {
+        grid-column: span 2;
+      }
+
+      .item-row {
+        grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
+      }
+
+      .vehicle-row {
+        grid-template-columns: 1fr;
+      }
+
+      .vehicle-left {
+        border-right: none;
+        border-bottom: 1px solid var(--line-soft);
+      }
+
+      .dashboard-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .dash-sidebar {
+        grid-template-rows: auto;
+        padding: 10px;
+      }
+
+      .dash-nav {
+        grid-auto-flow: column;
+        grid-template-columns: repeat(3, minmax(120px, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .topbar,
+      .quote-view,
+      .dashboard-view {
+        padding-left: 14px;
+        padding-right: 14px;
+      }
+
+      .mode-toggle {
+        width: 100%;
+      }
+
+      .mode-btn {
+        flex: 1;
+        text-align: center;
+      }
+
+      .topbar-right {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .quote-btn {
+        grid-column: auto;
+      }
+
+      .item-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .remove-item {
+        width: 100%;
+      }
+
+      .vehicle-left {
+        grid-template-columns: 56px 1fr;
+      }
+
+      .vehicle-icon {
+        width: 56px;
+        height: 48px;
+        font-size: 27px;
+      }
+
+      .vehicle-name {
+        font-size: 24px;
+      }
+
+      .option-row {
+        grid-template-columns: 1fr;
+      }
+
+      .option-price {
+        font-size: 27px;
+      }
+
+      .select-btn {
+        width: 100%;
+      }
+
+      .dash-main {
+        padding: 12px;
+      }
+
+      .dash-title {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="warp-mark" href="#">WARP</a>
+
+      <div class="topbar-right">
+        <div class="mode-toggle" role="tablist" aria-label="View mode">
+          <button class="mode-btn is-active" id="quoteModeBtn" role="tab" aria-selected="true">Public Quote</button>
+          <button class="mode-btn" id="dashboardModeBtn" role="tab" aria-selected="false">Customer Dashboard</button>
+        </div>
+        <a class="topbar-link" href="https://customer.wearewarp.com" target="_blank" rel="noopener noreferrer">Log in</a>
+        <a class="topbar-cta" href="https://www.wearewarp.com" target="_blank" rel="noopener noreferrer">Learn more <span aria-hidden="true">â</span></a>
+      </div>
+    </header>
+
+    <main>
+      <section class="view quote-view is-active" id="quoteView">
+        <div class="quote-wrap">
+          <div class="quote-form-card">
+            <form id="quoteForm" novalidate>
+              <div class="form-grid">
+                <div class="field">
+                  <label for="pickupZip">Pickup Zip <span class="required">*</span></label>
+                  <input class="input" id="pickupZip" name="pickupZip" type="text" inputmode="numeric" maxlength="5" placeholder="Input zip code" required>
+                  <div class="city-hint" id="pickupCity"></div>
+                </div>
+
+                <div class="field">
+                  <label for="deliveryZip">Delivery Zip <span class="required">*</span></label>
+                  <input class="input" id="deliveryZip" name="deliveryZip" type="text" inputmode="numeric" maxlength="5" placeholder="Input zip code" required>
+                  <div class="city-hint" id="deliveryCity"></div>
+                </div>
+
+                <div class="field">
+                  <label for="pickupDate">Pickup Date <span class="required">*</span></label>
+                  <input class="date-input" id="pickupDate" name="pickupDate" type="date" required>
+                </div>
+
+                <button class="quote-btn" type="submit" id="quoteBtn">ð Quote</button>
+              </div>
+
+              <div class="items-header">
+                <div class="items-title">Items</div>
+                <button class="add-item-btn" type="button" id="addItemBtn">Add item +</button>
+              </div>
+
+              <div class="item-list" id="itemRows"></div>
+
+              <div class="meta-row">
+                <div class="helper-text">Fill in all information to get the best quote.</div>
+                <div class="route-chip-wrap" id="routeChips">
+                  <span class="route-chip">No route selected</span>
+                </div>
+              </div>
+
+              <div class="error-banner" id="errorBanner"></div>
+            </form>
+          </div>
+
+          <div class="vehicle-board" id="vehicleBoard"></div>
+          <div class="subtle-note">API mode in this build: <strong>shipmentType = FTL</strong> for Cargo Van, 26' Box Truck, and 53' Truck.</div>
+        </div>
+      </section>
+
+      <section class="view dashboard-view" id="dashboardView">
+        <div class="dashboard-shell">
+          <aside class="dash-sidebar">
+            <a class="warp-mark dash-logo" href="#">WARP</a>
+            <nav class="dash-nav" aria-label="Customer navigation">
+              <a href="#"><span aria-hidden="true">â</span> Dashboard</a>
+              <a href="#" class="active"><span aria-hidden="true">ð</span> Shipments</a>
+              <a href="#"><span aria-hidden="true">ð</span> Carriers & Drivers</a>
+            </nav>
+          </aside>
+
+          <div class="dash-main">
+            <div class="dash-top">
+              <h2 class="dash-title">Shipments</h2>
+
+              <div class="dash-actions">
+                <input id="dashSearch" type="search" placeholder="Search route or ID">
+                <select id="dashStatusFilter">
+                  <option value="all">All status</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="completed">Completed</option>
+                  <option value="created">Created</option>
+                  <option value="pending">Pending</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <button type="button">Filters</button>
+                <button type="button">Export</button>
+                <button type="button" class="new">+ New Shipment</button>
+              </div>
+            </div>
+
+            <div class="dash-table-wrap">
+              <table aria-label="Shipments table">
+                <thead>
+                  <tr>
+                    <th>Shipment ID</th>
+                    <th>Route</th>
+                    <th>Ship. type</th>
+                    <th>Dispatch</th>
+                    <th>Carrier</th>
+                    <th>Driver</th>
+                    <th>Cost</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="dashTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="itemRowTemplate">
+    <div class="item-row" data-item-row>
+      <input class="input-slim" data-field="pallets" type="number" min="1" max="26" value="1" placeholder="# Pallets" required>
+      <input class="input-slim" data-field="weight" type="number" min="1" max="44000" value="2500" placeholder="Weight/pallet (lbs)" required>
+      <input class="input-slim" data-field="length" type="number" min="1" max="999" value="48" placeholder="L" required>
+      <input class="input-slim" data-field="width" type="number" min="1" max="999" value="48" placeholder="W" required>
+      <input class="input-slim" data-field="height" type="number" min="1" max="999" value="56" placeholder="H" required>
+      <button class="remove-item" type="button" title="Remove item" aria-label="Remove item">Ã</button>
+    </div>
+  </template>
+
+  <script>
+    // =========================================================================
+    // CONFIG
+    // =========================================================================
+    const API_URL = "/api/quote"; // Proxied through Vercel serverless function to bypass CORS
+    const API_KEY = "warp-public-freight-quote@wearewarp.com";
+    const BOOKING_BASE = "https://customer.wearewarp.com/public/freight-quote/create-shipment-freight-quote";
+
+    // Required API modes requested by user
+    const VEHICLES = [
+      {
+        id: "cargo_van",
+        name: "Cargo Van",
+        description: "Small dedicated deliveries",
+        icon: "ð",
+        code: "CARGO_VAN",
+        maxPallets: 1,
+        maxWeight: 2500
+      },
+      {
+        id: "straight_truck_26",
+        name: "26â Box Truck",
+        description: "Mid-size dedicated freight",
+        icon: "ð",
+        code: "STRAIGHT_TRUCK_26",
+        maxPallets: 12,
+        maxWeight: 10000
+      },
+      {
+        id: "dry_van_53",
+        name: "53â Truck",
+        description: "Full truckload capacity",
+        icon: "ð",
+        code: "DRY_VAN_53",
+        maxPallets: 26,
+        maxWeight: 44000
+      }
+    ];
+
+    const DASHBOARD_ROWS = [
+      { id: "P-00271-2428", route: "Los Angeles, CA â Brandon, FL", shipType: "FTL", dispatch: "1234-5678", carrier: "FedEx Freight", driver: "Robert Davis", cost: 2450, status: "in_progress", action: "Reassign" },
+      { id: "P-00271-2428", route: "Chicago, IL â Miami, FL", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 2000, status: "completed", action: "View" },
+      { id: "P-00271-2428", route: "Los Angeles, CA â Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "Unassigned", driver: "Unassigned", cost: 3200, status: "created", action: "Assign" },
+      { id: "P-00271-2428", route: "East Norwich, NY â Bound Brook, NJ", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "in_progress", action: "Assign" },
+      { id: "P-00271-2428", route: "Los Angeles, CA â Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "Unassigned", driver: "Unassigned", cost: 1750, status: "created", action: "Assign" },
+      { id: "P-00271-2428", route: "Los Angeles, CA â Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "cancelled", action: "Rebook" },
+      { id: "P-00271-2428", route: "Chicago, IL â Miami, FL", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "pending", action: "Assign" },
+      { id: "P-00271-2428", route: "Los Angeles, CA â Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "completed", action: "View" },
+      { id: "P-00271-2428", route: "Los Angeles, CA â Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "completed", action: "View" },
+      { id: "P-00271-2428", route: "Los Angeles, CA â Santa Monica, CA", shipType: "FTL", dispatch: "1234-5678", carrier: "WARP", driver: "WARP network", cost: 1250, status: "completed", action: "View" }
+    ];
+
+    const ZIP_CITIES = {};
+
+    const state = {
+      isLoading: false,
+      itemCount: 0,
+      lastForm: null
+    };
+
+    // =========================================================================
+    // VIEW MODE
+    // =========================================================================
+    const quoteView = document.getElementById("quoteView");
+    const dashboardView = document.getElementById("dashboardView");
+    const quoteModeBtn = document.getElementById("quoteModeBtn");
+    const dashboardModeBtn = document.getElementById("dashboardModeBtn");
+
+    function setMode(mode) {
+      const isQuote = mode === "quote";
+      quoteView.classList.toggle("is-active", isQuote);
+      dashboardView.classList.toggle("is-active", !isQuote);
+      quoteModeBtn.classList.toggle("is-active", isQuote);
+      dashboardModeBtn.classList.toggle("is-active", !isQuote);
+      quoteModeBtn.setAttribute("aria-selected", String(isQuote));
+      dashboardModeBtn.setAttribute("aria-selected", String(!isQuote));
+    }
+
+    quoteModeBtn.addEventListener("click", () => setMode("quote"));
+    dashboardModeBtn.addEventListener("click", () => setMode("dashboard"));
+
+    // =========================================================================
+    // ZIP LOOKUP
+    // =========================================================================
+    async function lookupZipCity(zip) {
+      if (!/^\d{5}$/.test(zip)) return "";
+      if (ZIP_CITIES[zip]) return ZIP_CITIES[zip];
+
+      try {
+        const res = await fetch(`https://api.zippopotam.us/us/${zip}`);
+        if (!res.ok) return "";
+        const data = await res.json();
+        const place = data.places?.[0];
+        if (!place) return "";
+        const city = `${place["place name"]}, ${place["state abbreviation"]}`;
+        ZIP_CITIES[zip] = city;
+        return city;
+      } catch {
+        return "";
+      }
+    }
+
+    // =========================================================================
+    // ITEM ROWS
+    // =========================================================================
+    const itemRowsEl = document.getElementById("itemRows");
+    const itemTemplate = document.getElementById("itemRowTemplate");
+
+    function sanitizeNumericInput(input, maxLen = 6) {
+      input.value = input.value.replace(/[^\d.]/g, "").slice(0, maxLen);
+    }
+
+    function addItemRow(defaults = {}) {
+      const node = itemTemplate.content.firstElementChild.cloneNode(true);
+
+      const fields = {
+        pallets: node.querySelector('[data-field="pallets"]'),
+        weight: node.querySelector('[data-field="weight"]'),
+        length: node.querySelector('[data-field="length"]'),
+        width: node.querySelector('[data-field="width"]'),
+        height: node.querySelector('[data-field="height"]')
+      };
+
+      Object.keys(fields).forEach((key) => {
+        if (defaults[key] != null) fields[key].value = String(defaults[key]);
+        fields[key].addEventListener("input", () => {
+          sanitizeNumericInput(fields[key]);
+          updateRouteChips();
+        });
+      });
+
+      node.querySelector(".remove-item").addEventListener("click", () => {
+        if (itemRowsEl.querySelectorAll("[data-item-row]").length <= 1) return;
+        node.remove();
+        state.itemCount = Math.max(1, state.itemCount - 1);
+        updateRouteChips();
+      });
+
+      itemRowsEl.appendChild(node);
+      state.itemCount += 1;
+      updateRouteChips();
+    }
+
+    function readItemsFromForm() {
+      const rows = [...itemRowsEl.querySelectorAll("[data-item-row]")];
+      return rows.map((row) => {
+        const qty = Number(row.querySelector('[data-field="pallets"]').value) || 0;
+        const weightPerUnit = Number(row.querySelector('[data-field="weight"]').value) || 0;
+        const length = Number(row.querySelector('[data-field="length"]').value) || 0;
+        const width = Number(row.querySelector('[data-field="width"]').value) || 0;
+        const height = Number(row.querySelector('[data-field="height"]').value) || 0;
+
+        return {
+          qty,
+          weightPerUnit,
+          length,
+          width,
+          height,
+          qtyUnit: "Pallet",
+          weightUnit: "lbs",
+          name: "1",
+          weightTotal: qty * weightPerUnit
+        };
+      });
+    }
+
+    function updateRouteChips() {
+      const chips = [];
+      const pickup = document.getElementById("pickupZip").value.trim();
+      const delivery = document.getElementById("deliveryZip").value.trim();
+      const date = document.getElementById("pickupDate").value;
+      const items = readItemsFromForm();
+
+      const totalPallets = items.reduce((sum, item) => sum + item.qty, 0);
+      const totalWeight = items.reduce((sum, item) => sum + item.weightTotal, 0);
+
+      if (/^\d{5}$/.test(pickup) && /^\d{5}$/.test(delivery)) {
+        chips.push(`${pickup} â ${delivery}`);
+      }
+      if (date) chips.push(new Date(date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }));
+      if (totalPallets > 0) chips.push(`${totalPallets} pallet${totalPallets === 1 ? "" : "s"}`);
+      if (totalWeight > 0) chips.push(`${totalWeight.toLocaleString()} lbs`);
+
+      const routeChips = document.getElementById("routeChips");
+      if (!chips.length) {
+        routeChips.innerHTML = '<span class="route-chip">No route selected</span>';
+        return;
+      }
+
+      routeChips.innerHTML = chips.map((chip) => `<span class="route-chip">${chip}</span>`).join("");
+    }
+
+    document.getElementById("addItemBtn").addEventListener("click", () => {
+      if (itemRowsEl.querySelectorAll("[data-item-row]").length >= 8) return;
+      addItemRow();
+    });
+
+    // =========================================================================
+    // QUOTE BOARD RENDERING
+    // =========================================================================
+    const vehicleBoard = document.getElementById("vehicleBoard");
+
+    function buildVehicleBoard() {
+      vehicleBoard.innerHTML = VEHICLES.map((vehicle) => {
+        return `
+          <article class="vehicle-row" data-vehicle-id="${vehicle.id}">
+            <div class="vehicle-left">
+              <div class="vehicle-icon">${vehicle.icon}</div>
+              <div>
+                <h3 class="vehicle-name">${vehicle.name}</h3>
+                <p class="vehicle-desc">${vehicle.description}</p>
+                <div class="vehicle-meta">
+                  <span>ð¦ Max ${vehicle.maxPallets} pallet${vehicle.maxPallets > 1 ? "s" : ""}</span>
+                  <span>âï¸ Max ${vehicle.maxWeight.toLocaleString()} lbs</span>
+                  <span>ð§  ${vehicle.code}</span>
+                </div>
+              </div>
+            </div>
+            <div class="vehicle-right" data-options-for="${vehicle.id}">
+              <div class="vehicle-state">Fill in information to get a quote</div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function setVehicleState(vehicleId, kind, text) {
+      const box = document.querySelector(`[data-options-for="${vehicleId}"]`);
+      if (!box) return;
+      box.innerHTML = `<div class="vehicle-state ${kind || ""}">${text}</div>`;
+    }
+
+    function renderVehicleOptions(vehicleId, quotes) {
+      const box = document.querySelector(`[data-options-for="${vehicleId}"]`);
+      if (!box) return;
+
+      if (!quotes.length) {
+        setVehicleState(vehicleId, "", "No quotes returned for this vehicle type on the selected route.");
+        return;
+      }
+
+      box.innerHTML = quotes.slice(0, 3).map((quote) => {
+        const quoteId = quote?._id || quote?.id || "";
+        const price = getQuoteCostUsd(quote);
+        const carrierName = getCarrierName(quote);
+        const pickupDate = state.lastForm?.pickupDate ? formatDisplayDate(state.lastForm.pickupDate) : "Pickup date";
+        const transitText = estimateTransitText(quote);
+
+        const action = quoteId
+          ? `<a class="select-btn" href="${BOOKING_BASE}?quoteId=${encodeURIComponent(quoteId)}" target="_blank" rel="noopener noreferrer">Select <span aria-hidden="true">âº</span></a>`
+          : `<span class="select-btn" style="opacity:0.6;pointer-events:none">Select <span aria-hidden="true">âº</span></span>`;
+
+        return `
+          <div class="option-row">
+            <div>
+              <div class="option-main">
+                <div class="option-price">$${price.toFixed(0)}</div>
+                <span class="option-carrier">${escapeHtml(carrierName)}</span>
+              </div>
+              <div class="option-meta">
+                <span>ð Pickup: ${pickupDate}</span>
+                <span>â± Est transit: ${transitText}</span>
+              </div>
+            </div>
+            ${action}
+          </div>
+        `;
+      }).join("");
+    }
+
+    // =========================================================================
+    // QUOTE HELPERS + API PAYLOAD
+    // =========================================================================
+    function formatDisplayDate(dateIso) {
+      try {
+        return new Date(dateIso + "T00:00:00").toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric"
+        });
+      } catch {
+        return dateIso;
+      }
+    }
+
+    function getQuoteCostUsd(quote) {
+      const rateAvg = quote?.warpQuote?.option?.rate?.avg;
+      if (typeof rateAvg === "number" && Number.isFinite(rateAvg)) return rateAvg;
+
+      if (quote?.total_charge?.unit === "US_cent" && typeof quote?.total_charge?.value === "number") {
+        return quote.total_charge.value / 100;
+      }
+
+      if (typeof quote?.price === "number") return quote.price;
+      return NaN;
+    }
+
+    function getCarrierName(quote) {
+      return quote?.legs?.[0]?.carrier?.name || quote?.carrierName || quote?.scac || "Carrier";
+    }
+
+    function estimateTransitText(quote) {
+      const days = quote?.eta?.days || quote?.estimatedTransitDays;
+      if (typeof days === "number" && Number.isFinite(days)) {
+        if (days <= 1) return "24 hours";
+        return `${days}-${days + 1} days`;
+      }
+      return "1-2 days";
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function buildPayload(vehicleCode, formState) {
+      const { pickupZip, deliveryZip, pickupDate, pickupCity, deliveryCity, items } = formState;
+
+      return {
+        key: API_KEY,
+        pickZipcode: String(pickupZip),
+        pickZipcodeCity: pickupCity || "",
+        dropZipcode: String(deliveryZip),
+        dropZipcodeCity: deliveryCity || "",
+        pickDate: pickupDate,
+        packaging: {
+          ltlItems: items.map((item) => ({
+            name: item.name,
+            length: item.length,
+            width: item.width,
+            height: item.height,
+            qty: item.qty,
+            qtyUnit: item.qtyUnit,
+            weightPerUnit: item.weightPerUnit,
+            weightUnit: item.weightUnit,
+            weightTotal: item.weightTotal
+          }))
+        },
+        isHazardous: false,
+        isTemperatureControlled: false,
+        pickupServices: [],
+        dropoffServices: [],
+
+        // User-requested API changes
+        shipmentType: "FTL",
+        vehicleType: {
+          code: vehicleCode
+        }
+      };
+    }
+
+    async function fetchVehicleQuotes(vehicle, formState) {
+      const payload = buildPayload(vehicle.code, formState);
+
+      const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status}`);
+      }
+
+      const json = await response.json();
+      const quotes = Array.isArray(json?.data?.quote) ? json.data.quote : [];
+
+      return quotes
+        .map((quote) => ({ quote, price: getQuoteCostUsd(quote) }))
+        .filter((item) => Number.isFinite(item.price))
+        .sort((a, b) => a.price - b.price)
+        .map((item) => item.quote);
+    }
+
+    function showError(message) {
+      const banner = document.getElementById("errorBanner");
+      banner.textContent = message;
+      banner.classList.add("is-visible");
+    }
+
+    function clearError() {
+      const banner = document.getElementById("errorBanner");
+      banner.textContent = "";
+      banner.classList.remove("is-visible");
+    }
+
+    // =========================================================================
+    // FORM SUBMIT
+    // =========================================================================
+    async function handleQuoteSubmit(event) {
+      event.preventDefault();
+      if (state.isLoading) return;
+
+      clearError();
+
+      const pickupZip = document.getElementById("pickupZip").value.trim();
+      const deliveryZip = document.getElementById("deliveryZip").value.trim();
+      const pickupDate = document.getElementById("pickupDate").value;
+
+      if (!/^\d{5}$/.test(pickupZip)) {
+        showError("Enter a valid 5-digit pickup ZIP.");
+        return;
+      }
+      if (!/^\d{5}$/.test(deliveryZip)) {
+        showError("Enter a valid 5-digit delivery ZIP.");
+        return;
+      }
+      if (!pickupDate) {
+        showError("Select a pickup date.");
+        return;
+      }
+
+      const items = readItemsFromForm();
+      if (!items.length) {
+        showError("Add at least one freight item.");
+        return;
+      }
+
+      for (const item of items) {
+        if (!item.qty || !item.weightPerUnit || !item.length || !item.width || !item.height) {
+          showError("Each item needs pallets, weight, and all dimensions.");
+          return;
+        }
+      }
+
+      const totalWeight = items.reduce((sum, item) => sum + item.weightTotal, 0);
+      if (totalWeight <= 0) {
+        showError("Total shipment weight must be greater than 0 lbs.");
+        return;
+      }
+
+      state.isLoading = true;
+      const quoteBtn = document.getElementById("quoteBtn");
+      quoteBtn.disabled = true;
+      quoteBtn.textContent = "Quoting...";
+
+      VEHICLES.forEach((vehicle) => {
+        setVehicleState(vehicle.id, "loading", "Fetching live rates for this vehicle type...");
+      });
+
+      const pickupCity = await lookupZipCity(pickupZip);
+      const deliveryCity = await lookupZipCity(deliveryZip);
+
+      state.lastForm = {
+        pickupZip,
+        deliveryZip,
+        pickupDate,
+        pickupCity,
+        deliveryCity,
+        items
+      };
+
+      try {
+        const result = await Promise.allSettled(
+          VEHICLES.map((vehicle) => fetchVehicleQuotes(vehicle, state.lastForm))
+        );
+
+        result.forEach((entry, index) => {
+          const vehicle = VEHICLES[index];
+
+          if (entry.status === "fulfilled") {
+            renderVehicleOptions(vehicle.id, entry.value);
+          } else {
+            setVehicleState(
+              vehicle.id,
+              "error",
+              "Quote unavailable right now for this vehicle. Try again in a moment."
+            );
+          }
+        });
+      } catch {
+        showError("Could not complete quote lookup. Please try again.");
+      } finally {
+        state.isLoading = false;
+        quoteBtn.disabled = false;
+        quoteBtn.textContent = "ð Quote";
+      }
+    }
+
+    // =========================================================================
+    // DASHBOARD TABLE
+    // =========================================================================
+    const dashTableBody = document.getElementById("dashTableBody");
+    const dashSearch = document.getElementById("dashSearch");
+    const dashStatusFilter = document.getElementById("dashStatusFilter");
+
+    function formatCurrency(num) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 2
+      }).format(num);
+    }
+
+    function renderDashboardRows() {
+      const query = dashSearch.value.trim().toLowerCase();
+      const status = dashStatusFilter.value;
+
+      const rows = DASHBOARD_ROWS.filter((row) => {
+        const matchQuery = !query
+          || row.id.toLowerCase().includes(query)
+          || row.route.toLowerCase().includes(query)
+          || row.carrier.toLowerCase().includes(query)
+          || row.driver.toLowerCase().includes(query);
+
+        const matchStatus = status === "all" || row.status === status;
+        return matchQuery && matchStatus;
+      });
+
+      if (!rows.length) {
+        dashTableBody.innerHTML = `
+          <tr>
+            <td colspan="9" class="muted">No shipments match this filter.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      dashTableBody.innerHTML = rows.map((row) => {
+        const carrierHtml = row.carrier === "Unassigned"
+          ? `<span class="muted">${row.carrier}</span>`
+          : row.carrier;
+        const driverHtml = row.driver === "Unassigned"
+          ? `<span class="muted">${row.driver}</span>`
+          : row.driver;
+
+        return `
+          <tr>
+            <td>${row.id} <span class="muted">ð ð</span></td>
+            <td>${row.route}</td>
+            <td>${row.shipType}</td>
+            <td>${row.dispatch}</td>
+            <td>${carrierHtml}</td>
+            <td>${driverHtml}</td>
+            <td>${formatCurrency(row.cost)}</td>
+            <td><span class="status ${row.status}">${row.status.replace("_", " ")}</span></td>
+            <td><a class="row-action" href="#">${row.action}</a></td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    dashSearch.addEventListener("input", renderDashboardRows);
+    dashStatusFilter.addEventListener("change", renderDashboardRows);
+
+    // =========================================================================
+    // INIT
+    // =========================================================================
+    async function handleZipInput(zipInputId, hintId) {
+      const input = document.getElementById(zipInputId);
+      const hint = document.getElementById(hintId);
+
+      input.addEventListener("input", async () => {
+        input.value = input.value.replace(/\D/g, "").slice(0, 5);
+        const city = await lookupZipCity(input.value);
+        hint.textContent = city;
+        updateRouteChips();
+      });
+    }
+
+    document.getElementById("pickupDate").addEventListener("change", updateRouteChips);
+    document.getElementById("quoteForm").addEventListener("submit", handleQuoteSubmit);
+
+    addItemRow({ pallets: 1, weight: 2500, length: 48, width: 48, height: 56 });
+    buildVehicleBoard();
+    renderDashboardRows();
+
+    handleZipInput("pickupZip", "pickupCity");
+    handleZipInput("deliveryZip", "deliveryCity");
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById("pickupDate").value = tomorrow.toISOString().split("T")[0];
+    updateRouteChips();
+  </script>
+</body>
+</html>
