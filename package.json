@@ -1,0 +1,6 @@
+{
+  "name": "warp-freight-quotes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Warp instant freight quote landing page with API proxy"
+}
